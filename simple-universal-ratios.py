@@ -1,10 +1,11 @@
 import pandas as pd
 import numpy as np
+import gzip
 
 #Hardcoded file locations
 train_file = 'data/raw/train.csv'
 test_file = 'data/raw/test.csv'
-submission_file = 'simple-universal-ratios-submission.csv'
+submission_file = 'simple-universal-ratios-submission.csv.gz'
 
 #load training file to data frame
 train = pd.read_csv(train_file,header=0)
@@ -30,6 +31,5 @@ df = pd.DataFrame(probs_array, columns=columns)
 
 df.insert(loc=0,column='Id',value=test['Id'])
 
-df.to_csv(submission_file,index=False)
-
-
+with gzip.open(submission_file,'wt') as archive:
+    df.to_csv(archive,index=False)
