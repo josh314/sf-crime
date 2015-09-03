@@ -1,3 +1,9 @@
+######################################################################
+# A benchmark script which assigns same probabilities to each test set member.
+# Probabilities are determined by the relative fraction of a category of
+# crime to the total number of crimes in the training set.
+######################################################################
+
 import pandas as pd
 import numpy as np
 import gzip
