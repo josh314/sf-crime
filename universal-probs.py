@@ -10,7 +10,7 @@ import gzip
 import os.path
 import sf_crime_config as conf
 
-#Hardcoded file locations
+#File locations
 train_file = conf.train_raw
 test_file = conf.test_raw
 submission_file = os.path.join(conf.submission_dir, \
