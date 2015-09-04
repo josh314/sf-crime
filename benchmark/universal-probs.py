@@ -11,7 +11,7 @@ import gzip
 #Hardcoded file locations
 train_file = 'data/raw/train.csv'
 test_file = 'data/raw/test.csv'
-submission_file = 'simple-universal-ratios-submission.csv.gz'
+submission_file = 'universal-probs-submission.csv.gz'
 
 #load training file to data frame
 train = pd.read_csv(train_file,header=0)
