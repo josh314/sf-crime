@@ -7,15 +7,18 @@
 import pandas as pd
 import numpy as np
 import gzip
+import os.path
+import sf_crime_config as conf
 
 #Hardcoded file locations
-train_file = 'data/raw/train.csv'
-test_file = 'data/raw/test.csv'
-submission_file = 'universal-probs-submission.csv.gz'
+train_file = conf.train_raw
+test_file = conf.test_raw
+submission_file = os.path.join(conf.submission_dir, \
+                               'universal-probs-submission.csv.gz')
 
 #load training file to data frame
 train = pd.read_csv(train_file,header=0)
-
+print("train imported")
 #Aggregate total number of each type of crime in training set
 crime_numbers = train.groupby('Category').size()
 #Create a row of overall probabilities out of the crime numbers
