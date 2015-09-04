@@ -5,14 +5,23 @@ import sf_crime_config as conf
 from sklearn.cluster import MiniBatchKMeans
 import os.path
 
+import optparse
+parser = optparse.OptionParser()
+
+parser.add_option("-o", action="store", type="string", dest="o")
+parser.add_option("-n", action="store", type="int", dest="n")
+parser.add_option("-s", action="store", type="int", dest="s")
+parser.set_defaults(o="out.csv.gz",n="8",s=100)
+opts, args = parser.parse_args()
+
 #Set number of clusters
-n_clusters = 32
+n_clusters = opts.n
+submission_file = opts.o
+batch_size = opts.s
 
 #File locations
 train_file = conf.train_raw
 test_file = conf.test_raw
-submission_file = os.path.join(conf.submission_dir, \
-                               'clustered-32-probs-submission.csv.gz')
 
 
 #load training file to data frame
@@ -22,7 +31,8 @@ crime_categories = sorted(train['Category'].unique())
 n_categories = len(crime_categories)
 
 #Init & train clusterer
-cl = MiniBatchKMeans(n_clusters=n_clusters,max_iter=100,batch_size=100,verbose=True)
+cl = MiniBatchKMeans(n_clusters=n_clusters,max_iter=100,\
+                     batch_size=batch_size,verbose=True)
 train_clusters = cl.fit_predict(locations)
 
 cluster_crimes = pd.DataFrame(train_clusters,columns=['Cluster'])
