@@ -26,7 +26,7 @@ test_file = conf.test_raw
 #load training file to data frame
 train = pd.read_csv(train_file,header=0)
 
-sample = np.random.choice(len(train), num_sample)
+sample = np.random.choice(len(train), num_sample, replace=False)
 sample_data = train.iloc[sample]
 
 locations = sample_data[['X','Y']].values
