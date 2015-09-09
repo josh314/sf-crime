@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 import gzip
 import sf_crime_config as conf
-import os.path
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import StratifiedShuffleSplit
+
 import optparse
 
 #Parse command line info
@@ -16,9 +16,10 @@ parser.add_option("-s", action="store", type="int", dest="s")
 parser.set_defaults(o="out.csv.gz",s=1000)
 opts, args = parser.parse_args()
 
-#Set number of neighbors, k
-submission_file = opts.o
+#Set option values
 num_sample = opts.s
+submission_file = opts.o
+
 
 #File locations
 train_file = conf.train_raw
@@ -27,17 +28,23 @@ test_file = conf.test_raw
 #load training file to data frame and take a sample for training kNN
 print("Loading training data...")
 train = pd.read_csv(train_file,header=0)
-sample = np.random.choice(len(train), len(train)/10, replace=False)
-sample_data = train.iloc[sample]
+#sample = np.random.choice(len(train), num_sample, replace=False)
+sample_data = train#.iloc[sample]
 locations = sample_data[['X','Y']].values
 target = sample_data['Category'].values
 
-print("Training...")
+print("Training with cross-validation...")
 knn = KNeighborsClassifier(algorithm='kd_tree')
-k = { 'n_neighbors': np.linspace(100,500,5) }
-cv = StratifiedShuffleSplit(target)
+k = { 'n_neighbors': np.linspace(400,400,1) }
+cv = StratifiedShuffleSplit(target, test_size=(num_sample//10), train_size=num_sample)
 knn_cv = GridSearchCV(estimator=knn, param_grid=k, scoring='log_loss', cv=cv, n_jobs=-1)
 knn_cv.fit(locations,target)
+
+print("Training and cross-validation complete")
+print("Best score:")
+print(knn_cv.best_score_)
+print("Best k value:")
+print(knn_cv.best_params_)
 
 #load test data and make predictions
 print('Loading test data...')
