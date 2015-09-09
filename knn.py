@@ -4,6 +4,8 @@ import gzip
 import sf_crime_config as conf
 import os.path
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.grid_search import GridSearchCV
+from sklearn.cross_validation import StratifiedShuffleSplit
 import optparse
 
 #Parse command line info
@@ -29,13 +31,16 @@ print("Loading training data...")
 train = pd.read_csv(train_file,header=0)
 sample = np.random.choice(len(train), num_sample, replace=False)
 sample_data = train.iloc[sample]
-
 locations = sample_data[['X','Y']].values
 target = sample_data['Category'].values
 
 print("Training...")
-knn = KNeighborsClassifier(n_neighbors=k,algorithm='kd_tree')
-knn.fit(locations, target)
+knn = KNeighborsClassifier(algorithm='kd_tree')
+k = { 'n_neighbors': [1,5,10] }
+cv = StratefiedShuffleSplit(len(sample))
+knn_cv = GridSearchCV(estimator=knn, param_grid=k, scoring='log_loss', cv=cv)
+knn_cv.fit(locations,target)
+
 
 #load test data and make predictions
 print('Loading test data...')
