@@ -12,13 +12,11 @@ import optparse
 parser = optparse.OptionParser()
 
 parser.add_option("-o", action="store", type="string", dest="o")
-parser.add_option("-k", action="store", type="int", dest="k")
 parser.add_option("-s", action="store", type="int", dest="s")
-parser.set_defaults(o="out.csv.gz",k=5, s=1000)
+parser.set_defaults(o="out.csv.gz",s=1000)
 opts, args = parser.parse_args()
 
 #Set number of neighbors, k
-k = opts.k
 submission_file = opts.o
 num_sample = opts.s
 
@@ -29,25 +27,24 @@ test_file = conf.test_raw
 #load training file to data frame and take a sample for training kNN
 print("Loading training data...")
 train = pd.read_csv(train_file,header=0)
-sample = np.random.choice(len(train), num_sample, replace=False)
+sample = np.random.choice(len(train), len(train)/10, replace=False)
 sample_data = train.iloc[sample]
 locations = sample_data[['X','Y']].values
 target = sample_data['Category'].values
 
 print("Training...")
 knn = KNeighborsClassifier(algorithm='kd_tree')
-k = { 'n_neighbors': [1,5,10] }
-cv = StratefiedShuffleSplit(len(sample))
-knn_cv = GridSearchCV(estimator=knn, param_grid=k, scoring='log_loss', cv=cv)
+k = { 'n_neighbors': np.linspace(100,500,5) }
+cv = StratifiedShuffleSplit(target)
+knn_cv = GridSearchCV(estimator=knn, param_grid=k, scoring='log_loss', cv=cv, n_jobs=-1)
 knn_cv.fit(locations,target)
-
 
 #load test data and make predictions
 print('Loading test data...')
 test = pd.read_csv(test_file,header=0)
 test_locations = test[['X','Y']].values
 print('Computing predictions on test data...')
-preds = knn.predict_proba(test_locations)
+preds = knn_cv.predict_proba(test_locations)
 
 #Start building dataframe for output
 print('Organizing output...')
